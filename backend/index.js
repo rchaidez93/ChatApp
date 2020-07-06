@@ -2,14 +2,20 @@ var app = require('express')();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
-app.get('/',(req, res) => {
-	res.send('<h1>Hello World!</h1>');
-});
-
 io.on('connection', (socket) => {
 	console.log('a user connected');
 
-	socket.emit("FROMAPI", "Hello there sir!");
+	socket.on("new message", (message) => {
+		io.emit("new message", message)
+	});
+
+	socket.on('user typing', () => {
+		io.emit('user typing','user is typing');
+	})
+
+	socket.on('stop typing', () => {
+		io.emit('stop typing', 'no typing');
+	})
 
 	socket.on('disconnect', () => {
 		console.log('user disconnected');
