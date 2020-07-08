@@ -4,7 +4,19 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import SendIcon from '@material-ui/icons/Send';
 import AddIcon from '@material-ui/icons/Add';
-import { Typography, List, ListItem, ListItemText, Drawer, Divider, TextField, IconButton, Paper, ListSubheader, Grid,  } from '@material-ui/core';
+import { 
+    Typography, 
+    List, 
+    ListItem, 
+    ListItemText, 
+    Drawer, 
+    Divider, 
+    TextField, 
+    IconButton, 
+    Paper, 
+    ListSubheader, 
+    Grid,  
+} from '@material-ui/core';
 
 import socketIOClient from "socket.io-client";
 const ENDPOINT = "http://127.0.0.1:3001";
@@ -25,9 +37,6 @@ const useStyles = makeStyles((theme) => ({
         width: `calc(100% - ${drawerWidth}px)`,
         marginLeft: drawerWidth
     },
-    grow: {
-        flexGrow: 1,
-    },
     paper: {
         paddingBottom: 50,
         width: '100%',
@@ -38,17 +47,12 @@ const useStyles = makeStyles((theme) => ({
     drawer: {
         width: drawerWidth,
         flexShrink: 0,
-      },
-      drawerPaper: {
+    },
+    drawerPaper: {
         width: drawerWidth,
-      },
+    },
       // necessary for content to be below app bar
-      toolbar: theme.mixins.toolbar,
-      content: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing(3),
-      },
+    toolbar: theme.mixins.toolbar,
     input: {
         backgroundColor: theme.palette.common.white
     },
@@ -58,25 +62,45 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const messages = [
-    {
-      id: 1,
-      primary: 'Brunch this week?',
-      secondary: "I'll be in the neighbourhood this week. Let's grab a bite to eat",
-    },
-]
+let socket;
 
 const ChatRoom = () => {
     const classes = useStyles();
     const [channels, setChannels] = useState(['Everyone']);
     const [directMessages, setDirectMessages] = useState(['Jone Doe']);
+    const [ message, setMessage ] = useState("");
+    const [ allMessages, setAllMessages ] = useState([]);
 
     useEffect(() => {
-        const socket = socketIOClient(ENDPOINT);
-        socket.on("FROMAPI", data => {
-            console.log(data);
-        })
+        socket = socketIOClient(ENDPOINT);
+        socket.on('connect', () => {
+            console.log(socket.id);
+        });
+    }, [ENDPOINT]);
+    
+    useEffect(() => {
+        socket.on("new message", (message) => {
+            const recievedMessage = {
+                primary: "Testing",
+                secondary: message
+            };
+            setAllMessages(allMessages => [...allMessages,recievedMessage]);
+        });
+        socket.on('disconnect', (reason) => {
+            if(reason === 'io server disconnect'){
+                socket.connect();
+            }//else it'll try to reconnect on its own.
+        });
     }, []);
+
+    const sendMessage = () => {
+        socket.emit("new message", message);
+        setMessage("");
+    }
+
+    const handleMessageChange = (event) => {
+        setMessage(event.target.value);
+    }
 
     return (
         <div className={classes.root}>
@@ -156,10 +180,9 @@ const ChatRoom = () => {
                 <Grid item xs={12}>
                     <Paper square elevation={0} className={classes.paper}>
                         <List>
-                        {messages.map(({ id, primary, secondary, person }) => (
-                            <React.Fragment key={id}>
-                            {id === 1 && <ListSubheader className={classes.subheader}>Today</ListSubheader>}
-                            {id === 3 && <ListSubheader className={classes.subheader}>Yesterday</ListSubheader>}
+                        {allMessages.map(({primary, secondary }, index) => (
+                            <React.Fragment key={index}>
+                            {index === 0 && <ListSubheader className={classes.subheader}>Today</ListSubheader>}
                             <ListItem button>
                                 <ListItemText primary={primary} secondary={secondary} />
                             </ListItem>
@@ -174,15 +197,26 @@ const ChatRoom = () => {
                     <div style={{width: "90%"}}>
                         <TextField 
                         fullWidth={true} 
-                        id="filled-basic" 
+                        id="message" 
                         label="Start typing" 
                         variant="filled"
                         classes={{
                             root: classes.input
                         }}
+                        value={message}
+                        onChange={handleMessageChange}
+                        onKeyPress={(ev) => {
+                            if(ev.key === "Enter"){
+                                sendMessage()
+                            }
+                        }}
                         />
                     </div>
-                    <IconButton aria-label="send-message" className={classes.sendButton}>
+                    <IconButton 
+                    aria-label="send-message" 
+                    className={classes.sendButton} 
+                    onClick={sendMessage}
+                    >
                         <SendIcon fontSize="large"/>
                     </IconButton>
                 </Toolbar>
