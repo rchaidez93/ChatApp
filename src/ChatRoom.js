@@ -3,7 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import SendIcon from '@material-ui/icons/Send';
-import AddIcon from '@material-ui/icons/Add';
 import { 
     Typography, 
     List, 
@@ -15,10 +14,12 @@ import {
     IconButton, 
     Paper, 
     ListSubheader, 
-    Grid,  
+    Grid,
+    Button,  
 } from '@material-ui/core';
 
 import socketIOClient from "socket.io-client";
+import ListView from './components/ListView';
 const ENDPOINT = "http://127.0.0.1:3001";
 
 const drawerWidth = 300;
@@ -66,10 +67,12 @@ let socket;
 
 const ChatRoom = () => {
     const classes = useStyles();
-    const [channels, setChannels] = useState(['Everyone']);
+    const [channels, setChannels] = useState(['Public']);
     const [directMessages, setDirectMessages] = useState(['Jone Doe']);
-    const [ message, setMessage ] = useState("");
-    const [ allMessages, setAllMessages ] = useState([]);
+    const [selectedChannel, setSelectedChannel] = useState("Public");
+    const [message, setMessage] = useState("");
+    const [allMessages, setAllMessages] = useState([]);
+    const [username, setUserName] = useState("Richard Chaidez");
 
     useEffect(() => {
         socket = socketIOClient(ENDPOINT);
@@ -106,75 +109,36 @@ const ChatRoom = () => {
         <div className={classes.root}>
             <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar>
-                    <Typography variant="h6" noWrap>
-                        Permanent drawer
+                    <Typography align="center" variant="h6" noWrap>
+                        {selectedChannel}
                     </Typography>
                 </Toolbar>
             </AppBar>
-            
             <Drawer
-                className={classes.drawer}
-                variant="permanent"
-                classes={{
-                paper: classes.drawerPaper,
-                }}
-                anchor="left"
+            className={classes.drawer}
+            variant="permanent"
+            classes={{
+            paper: classes.drawerPaper,
+            }}
+            anchor="left"
             >
-                <div className={classes.toolbar}>
-                    You
-                </div>
+                <Button> 
+                    {username}
+                </Button>
                 <Divider />
-                <List 
-                component="nav"
-                aria-labelledby="nested-list-channels"
-                subheader={
-                    <ListSubheader component="div" id="nested-list-channels">
-                        <Grid container alignItems="center" justify="space-between">
-                            <Grid item>
-                                <Typography>
-                                    Channels
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <IconButton>
-                                    <AddIcon fontSize="small" />
-                                </IconButton>
-                            </Grid>
-                        </Grid>
-                    </ListSubheader>
-                    }>
-                {channels.map((text, index) => (
-                    <ListItem button key={text}>
-                    <ListItemText primary={text} />
-                    </ListItem>
-                ))}
-                </List>
+                <ListView
+                listHeaderText="Channels"
+                data={channels}
+                selectedChannel={selectedChannel}
+                onClick={(text) => setSelectedChannel(text)}
+                />
                 <Divider />
-                <List
-                component="nav"
-                aria-labelledby="nested-list-channels"
-                subheader={
-                    <ListSubheader component="div" id="nested-list-direct-messages">
-                        <Grid container alignItems="center" justify="space-between">
-                            <Grid item>
-                                <Typography>
-                                    Direct Messages
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <IconButton>
-                                    <AddIcon fontSize="small" />
-                                </IconButton>
-                            </Grid>
-                        </Grid>
-                    </ListSubheader>
-                    }>
-                {directMessages.map((text, index) => (
-                    <ListItem button key={text}>
-                    <ListItemText primary={text} />
-                    </ListItem>
-                ))}
-                </List>
+                <ListView
+                listHeaderText="Direct Messages"
+                data={directMessages}
+                selectedChannel={selectedChannel}
+                onClick={(text) => setSelectedChannel(text)}
+                />
             </Drawer>
             <Grid container>
                 <Grid item xs={12}>
