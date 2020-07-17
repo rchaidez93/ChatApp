@@ -19,7 +19,7 @@ import {
 } from '@material-ui/core';
 
 import socketIOClient from "socket.io-client";
-import ListView from './components/ListView';
+import ListView from '../components/ListView';
 const ENDPOINT = "http://127.0.0.1:3001";
 
 const drawerWidth = 300;
