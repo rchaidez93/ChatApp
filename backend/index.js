@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const usersRouter = require('./routes/users');
 
 require('dotenv').config();
+require('dotenv').config({path: '/Users/richardchaidez/Documents/webProjects/react/chat-app/backend/.env.development.local'});
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
