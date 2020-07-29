@@ -9,6 +9,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import useAuth from '../hooks/useAuth';
 
 
 const useStyles = makeStyles(theme => ({
@@ -31,14 +32,15 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Login() {
+const Login = () => {
   const classes = useStyles();
+  const auth = useAuth();
 
-  const [ email, setEmail ] = useState("");
+  const [ username, setUsername ] = useState("");
   const [ password, setPassword ] = useState("");
 
-
   const handleLogin = (e) => {
+    auth.login(username, password);
     e.preventDefault();
   }
   
@@ -58,13 +60,13 @@ export default function Login() {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
             autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             variant="outlined"
@@ -99,3 +101,5 @@ export default function Login() {
     </Container>
   );
 }
+
+export default Login;

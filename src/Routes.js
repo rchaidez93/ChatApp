@@ -1,22 +1,48 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
-    Router,
+    BrowserRouter as Router,
     Switch,
     Route,
+    Redirect,
+    Link,
   } from "react-router-dom";
 import Login from './pages/Login';
 import ChatRoom from './pages/ChatRoom';
-import History from './utils/History';
+import Welcome from './pages/Welcome';
+import AuthCheck from './utils/AuthCheck';
+import Callback from './utils/CallBack';
+import { AuthContext } from './context/auth-context';
+import { Button } from '@material-ui/core';
+
+const PrivateRoute = ({component: Component, auth }) => (
+    <Route 
+    render={props => auth === true
+      ? <Component auth={auth} {...props} />
+      : <Redirect to={{pathname:'/login'}} />
+    }
+    />
+)
 
 const Routes = () => {
+    const context = useContext(AuthContext);
     return (
-        <Router history={History}>
+        <Router>
+            <Link to="/login">
+                <Button>Login</Button>
+            </Link>
             <Switch>
-                <Route exact path="/" component={Login}/>
-                <Route path="/chatroom" component={ChatRoom}/>
+                <Route exact path="/" component={Welcome} />
+                <Route path="/login" component={Login} />
+                <Route path='/authcheck' component={AuthCheck} />
+                <PrivateRoute 
+                    path="/chatroom"
+                    auth={context.state.authenticated}
+                    component={ChatRoom}
+                />             
+                <Route path='/callback' component={Callback} />
             </Switch>
         </Router>
-    )
-};
+    );
+}
 
 export default Routes;

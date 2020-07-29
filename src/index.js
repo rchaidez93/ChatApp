@@ -3,9 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 import Routes from './Routes';
+import { AuthProvider } from './context/auth-context';
 
 ReactDOM.render(
-  <Routes />,
+  <AuthProvider>
+    <Routes />
+  </AuthProvider>
+  ,
   document.getElementById('root')
 );
 

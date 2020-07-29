@@ -21,6 +21,10 @@ const userSchema = new Schema({
     }
 });
 
+userSchema.methods.comparePassword = function(candidatePassword){
+    return candidatePassword.localeCompare(this.password);   
+}
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

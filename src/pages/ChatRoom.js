@@ -17,9 +17,10 @@ import {
     Grid,
     Button,  
 } from '@material-ui/core';
-
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import socketIOClient from "socket.io-client";
 import ListView from '../components/ListView';
+import useAuth from '../hooks/useAuth';
 const ENDPOINT = "http://127.0.0.1:3001";
 
 const drawerWidth = 300;
@@ -67,6 +68,7 @@ let socket;
 
 const ChatRoom = () => {
     const classes = useStyles();
+    const auth = useAuth();
     const [channels, setChannels] = useState(['Public']);
     const [directMessages, setDirectMessages] = useState(['Jone Doe']);
     const [selectedChannel, setSelectedChannel] = useState("Public");
@@ -76,12 +78,6 @@ const ChatRoom = () => {
 
     useEffect(() => {
         socket = socketIOClient(ENDPOINT);
-        socket.on('connect', () => {
-            console.log(socket.id);
-        });
-    }, [ENDPOINT]);
-    
-    useEffect(() => {
         socket.on("new message", (message) => {
             const recievedMessage = {
                 primary: "Testing",
@@ -112,6 +108,9 @@ const ChatRoom = () => {
                     <Typography align="center" variant="h6" noWrap>
                         {selectedChannel}
                     </Typography>
+                    <IconButton onClick={() => auth.logout()}>
+                        <ExitToAppIcon fontSize="small" />
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             <Drawer

@@ -9,7 +9,9 @@ router.route('/authenticate').post((req,res) => {
     User.findOne({username:username}, (err, user) => {
         if(err) throw err;
 
-        if(password === "password"){
+        const passwordMatch = user.comparePassword(password);
+
+        if(passwordMatch === 0){
             isAuthenticated = true;
             res.json({authenticated: isAuthenticated});
         }else{
