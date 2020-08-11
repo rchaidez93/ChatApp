@@ -3,35 +3,27 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import SendIcon from '@material-ui/icons/Send';
-import { 
-    Typography, 
-    List, 
-    ListItem, 
-    ListItemText, 
-    Drawer, 
-    Divider, 
-    TextField, 
-    IconButton, 
-    Paper, 
-    ListSubheader, 
-    Grid,
-    Button,  
-} from '@material-ui/core';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import socketIOClient from "socket.io-client";
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import Paper from '@material-ui/core/Paper';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import io from "socket.io-client";
 import ListView from '../components/ListView';
-import useAuth from '../hooks/useAuth';
-const ENDPOINT = "http://127.0.0.1:3001";
+import RoomHeader from '../components/RoomHeader';
 
+const ENDPOINT = "http://127.0.0.1:3001";
 const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex'
-    },
-    appBar: {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: drawerWidth,
     },
     appBarBottom: {
         top: 'auto',
@@ -65,10 +57,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let socket;
-
 const ChatRoom = () => {
     const classes = useStyles();
-    const auth = useAuth();
     const [channels, setChannels] = useState(['Public']);
     const [directMessages, setDirectMessages] = useState(['Jone Doe']);
     const [selectedChannel, setSelectedChannel] = useState("Public");
@@ -77,8 +67,10 @@ const ChatRoom = () => {
     const [username, setUserName] = useState("Richard Chaidez");
 
     useEffect(() => {
-        socket = socketIOClient(ENDPOINT);
-        socket.on("new message", (message) => {
+        socket = io(ENDPOINT);
+        socket.emit('join room', selectedChannel);
+
+        socket.on("new message", (message) => {     
             const recievedMessage = {
                 primary: "Testing",
                 secondary: message
@@ -93,7 +85,11 @@ const ChatRoom = () => {
     }, []);
 
     const sendMessage = () => {
-        socket.emit("new message", message);
+        const testing = {
+            room: selectedChannel,
+            message
+        }
+        socket.emit("new message", testing);
         setMessage("");
     }
 
@@ -101,18 +97,18 @@ const ChatRoom = () => {
         setMessage(event.target.value);
     }
 
+    const handleChannelChange = (channel) => {
+        socket.emit("leave room", selectedChannel);
+        console.log(channel);
+        socket.emit("join room", channel);
+        setSelectedChannel(channel);
+    }
+
     return (
         <div className={classes.root}>
-            <AppBar position="fixed" className={classes.appBar}>
-                <Toolbar>
-                    <Typography align="center" variant="h6" noWrap>
-                        {selectedChannel}
-                    </Typography>
-                    <IconButton onClick={() => auth.logout()}>
-                        <ExitToAppIcon fontSize="small" />
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
+            <RoomHeader
+             room={selectedChannel}
+            />
             <Drawer
             className={classes.drawer}
             variant="permanent"
@@ -129,14 +125,18 @@ const ChatRoom = () => {
                 listHeaderText="Channels"
                 data={channels}
                 selectedChannel={selectedChannel}
-                onClick={(text) => setSelectedChannel(text)}
+                onClick={(text) => {
+                    handleChannelChange(text);
+                }}
                 />
                 <Divider />
                 <ListView
                 listHeaderText="Direct Messages"
                 data={directMessages}
                 selectedChannel={selectedChannel}
-                onClick={(text) => setSelectedChannel(text)}
+                onClick={(text) => {
+                    handleChannelChange(text);
+                }}
                 />
             </Drawer>
             <Grid container>

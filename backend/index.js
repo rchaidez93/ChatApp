@@ -21,8 +21,18 @@ app.use('/users', usersRouter);
 io.on('connection', (socket) => {
 	console.log('a user connected');
 
-	socket.on("new message", (message) => {
-		io.emit("new message", message)
+	socket.on("join room", (room) => {
+		socket.join(room, () => {
+			socket.in(room).emit("new message", "Testing new room");
+		});
+	});
+
+	socket.on("leave room", (room) => {
+		socket.leave(room);
+	})
+
+	socket.on("new message", (data) => {
+		socket.to(data.room).emit("new message", data.message)
 	});
 
 	socket.on('user typing', () => {
