@@ -18,6 +18,12 @@ const userSchema = new Schema({
     lname:{
         type: String,
         trim: true,
+    },
+    public_channels: {
+        type: Array
+    },
+    direct_channels: {
+        type: Array
     }
 });
 

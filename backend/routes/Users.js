@@ -1,7 +1,7 @@
 const router  = require('express').Router();
 let User = require('../models/user.model');
 
-router.route('/authenticate').post((req,res) => {
+router.post('/authenticate', (req,res) => {   
     const username = req.body.username;
     const password = req.body.password;
 
@@ -19,6 +19,18 @@ router.route('/authenticate').post((req,res) => {
             res.json({authenticated: isAuthenticated});
         }
     });
-})
+});
+
+router.get('/channels', (req, res) => {
+    User.findOne({username: req.body.username}, {public_channels: 1,direct_channels: 1}, (err, user) => {
+        if(err) throw err;
+
+        res.json({
+            "public": user.public_channels,
+            "direct": user.direct_channels
+        })
+
+    });
+});
 
 module.exports = router;
