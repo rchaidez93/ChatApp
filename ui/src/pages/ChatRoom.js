@@ -66,8 +66,10 @@ const ChatRoom = () => {
     const [allMessages, setAllMessages] = useState([]);
     const [username, setUserName] = useState("Richard Chaidez");
 
+    socket = io(ENDPOINT);
+    
     useEffect(() => {
-        socket = io(ENDPOINT);
+        
         socket.emit('join room', selectedChannel);
 
         socket.on("new message", (message) => {     

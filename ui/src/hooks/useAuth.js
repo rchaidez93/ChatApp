@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { useRouter } from './useRouter';
+import { useContext } from 'react';
+import { AuthContext } from '../context/auth-context';
 
 function useAuth() {
 
     const router = useRouter();
+    const context = useContext(AuthContext);
+    const { dispatch } = context;
     
     const login = (username, password) => {
 
@@ -14,6 +18,7 @@ function useAuth() {
             const { data } = response;
             if(data.authenticated) {
                 localStorage.setItem("user", username);
+                dispatch({type: "USER", payload: data.user})
                 router.push("/callback");
             }
     

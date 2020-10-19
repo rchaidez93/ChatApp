@@ -13,11 +13,16 @@ import AuthCheck from './utils/AuthCheck';
 import Callback from './utils/CallBack';
 import { AuthContext } from './context/auth-context';
 import { Button } from '@material-ui/core';
+import {WorkSpaceProvider} from './context/WorkSpaceContext';
 
-const PrivateRoute = ({component: Component, auth }) => (
+const PrivateRoute = ({component: Component, auth, user }) => (
     <Route 
     render={props => auth === true
-      ? <Component auth={auth} {...props} />
+      ? (
+        <WorkSpaceProvider user={user}>
+            <Component auth={auth} {...props} />
+        </WorkSpaceProvider>
+      )
       : <Redirect to={{pathname:'/authcheck'}} />
     }
     />
@@ -25,6 +30,7 @@ const PrivateRoute = ({component: Component, auth }) => (
 
 const Routes = () => {
     const context = useContext(AuthContext);
+    console.log(context);
     return (
         <Router>
             <Link to="/login">
@@ -37,6 +43,7 @@ const Routes = () => {
                 <PrivateRoute 
                     path="/chatroom"
                     auth={context.state.authenticated}
+                    user={context.state.user}
                     component={ChatRoom}
                 />             
                 <Route path='/callback' component={Callback} />

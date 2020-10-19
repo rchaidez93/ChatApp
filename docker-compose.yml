@@ -1,0 +1,19 @@
+version: "2"
+services:
+  ui:
+    build: ./ui
+    stdin_open: true #putting this here because it breaks with react-scripts@3.4.1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+  api:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:3.2.4
+    ports: 
+      - "27017:27017"
