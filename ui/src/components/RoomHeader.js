@@ -3,10 +3,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import useAuth from '../hooks/useAuth';
-import { makeStyles, Icon } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 
 const drawerWidth = 300;
 const useStyles = makeStyles(() => ({

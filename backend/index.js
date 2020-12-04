@@ -1,8 +1,8 @@
 
 const express = require('express');
 const http = require('http');
-const cors = require('cors');
 const socketIO = require('socket.io');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const usersRouter = require('./routes/Users');
 const workspacesRouter = require('./routes/Workspaces');
@@ -10,12 +10,12 @@ const workspacesRouter = require('./routes/Workspaces');
 require('dotenv').config();
 require('dotenv').config({path: '/Users/richardchaidez/Documents/webProjects/react/chat-app/backend/.env.development.local'});
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 const port = process.env.PORT || 8080;
 const uri = "mongodb://mongo:27017/chatapp";
 const io = socketIO(server);
 
-app.use(cors());
 app.use(express.json());
 app.use('/users', usersRouter);
 app.use('/workspace',workspacesRouter);

@@ -18,7 +18,7 @@ import io from "socket.io-client";
 import ListView from '../components/ListView';
 import RoomHeader from '../components/RoomHeader';
 
-const ENDPOINT = "http://127.0.0.1:3001";
+const ENDPOINT = "http://127.0.0.1:8080";
 const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
@@ -59,12 +59,12 @@ const useStyles = makeStyles((theme) => ({
 let socket;
 const ChatRoom = () => {
     const classes = useStyles();
-    const [channels, setChannels] = useState(['Public']);
-    const [directMessages, setDirectMessages] = useState(['Jone Doe']);
+    const [channels] = useState(['Public']);
+    const [directMessages] = useState(['Jone Doe']);
     const [selectedChannel, setSelectedChannel] = useState("Public");
     const [message, setMessage] = useState("");
     const [allMessages, setAllMessages] = useState([]);
-    const [username, setUserName] = useState("Richard Chaidez");
+    const [username] = useState("Richard Chaidez");
 
     socket = io(ENDPOINT);
     
@@ -84,7 +84,7 @@ const ChatRoom = () => {
                 socket.connect();
             }//else it'll try to reconnect on its own.
         });
-    }, []);
+    }, [selectedChannel]);
 
     const sendMessage = () => {
         const testing = {

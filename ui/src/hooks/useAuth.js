@@ -11,7 +11,7 @@ function useAuth() {
     
     const login = (username, password) => {
 
-        axios.post("/users/authenticate", {
+        axios.post("http://127.0.0.1:8080/users/authenticate", {
             username: username,
             password: password
         }).then(response => {
