@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -17,6 +17,7 @@ import Button from '@material-ui/core/Button';
 import io from "socket.io-client";
 import ListView from '../components/ListView';
 import RoomHeader from '../components/RoomHeader';
+import WorkSpaceContext from '../context/WorkSpaceContext';
 
 const ENDPOINT = "http://127.0.0.1:8080";
 const drawerWidth = 300;
@@ -62,37 +63,45 @@ const ChatRoom = () => {
     const [channels] = useState(['Public']);
     const [directMessages] = useState(['Jone Doe']);
     const [selectedChannel, setSelectedChannel] = useState("Public");
+    const [joinedRoom, setJoinedRoom] = useState(false);
     const [message, setMessage] = useState("");
     const [allMessages, setAllMessages] = useState([]);
-    const [username] = useState("Richard Chaidez");
+
+    const workspace = useContext(WorkSpaceContext);
+    const { username } = workspace;
 
     socket = io(ENDPOINT);
     
     useEffect(() => {
-        
-        socket.emit('join room', selectedChannel);
-
-        socket.on("new message", (message) => {     
-            const recievedMessage = {
-                primary: "Testing",
-                secondary: message
+            const joinRoomData = {
+                room: "Public",
+                user: username
             };
-            setAllMessages(allMessages => [...allMessages,recievedMessage]);
-        });
-        socket.on('disconnect', (reason) => {
-            if(reason === 'io server disconnect'){
-                socket.connect();
-            }//else it'll try to reconnect on its own.
-        });
+            socket.emit('join room', joinRoomData);
+            socket.on("new message", (message) => { 
+                console.log(message);
+                const recievedMessage = {
+                    primary: message.primary,
+                    secondary: message.secondary
+                };
+                setAllMessages(allMessages => [...allMessages,recievedMessage]);
+            });
+        
+            socket.on('disconnect', (reason) => {
+                if(reason === 'io server disconnect'){
+                    socket.connect();
+                }//else it'll try to reconnect on its own.
+            });
     }, [selectedChannel]);
 
     const sendMessage = () => {
         const testing = {
+            user: username,
             room: selectedChannel,
             message
         }
         socket.emit("new message", testing);
-        setMessage("");
+        
     }
 
     const handleMessageChange = (event) => {
@@ -101,9 +110,9 @@ const ChatRoom = () => {
 
     const handleChannelChange = (channel) => {
         socket.emit("leave room", selectedChannel);
-        console.log(channel);
-        socket.emit("join room", channel);
         setSelectedChannel(channel);
+        socket.emit("join room", channel);
+        
     }
 
     return (

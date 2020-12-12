@@ -41,15 +41,15 @@ router.post('/authenticate', (req,res) => {
 });
 
 //add user
-router.post('/', (req,res) => {
+router.post('/add_user', (req,res) => {
     const newUser = [{
-        "workspace_id": 2,
-        "user_id": 1,
+        "workspace_id": req.body.workspace_id,
+        // "user_id": 1,
         "admin": true,
-        "username": "richi",
+        "username": "Slack",
         "password": "password",
-        "fname": "Rich",
-        "lname": "Chaidez",
+        "fname": "",
+        "lname": "",
         "public_channels": [],
         "direct_channels": []
     }];
@@ -63,33 +63,39 @@ router.post('/', (req,res) => {
 })
 
 //delete user
-router.delete('/')
 
 //get user channels
-router.get('/channels', (req, res) => {
-    const result = User.findOne({username: req.body.username}, {public_channels: 1,direct_channels: 1}, (err, user) => {
-        if(err) throw err;
+// router.get('/channels', (req, res) => {
+//     const result = User.findOne({username: req.body.username}, {public_channels: 1,direct_channels: 1}, (err, user) => {
+//         if(err) throw err;
 
-        res.json({
-            "public": user.public_channels,
-            "direct": user.direct_channels
-        })
-        console.log(result);
-    });
-});
+//         res.json({
+//             "public": user.public_channels,
+//             "direct": user.direct_channels
+//         })
+//         console.log(result);
+//     });
+// });
 
 //add user channels
-router.post('/channels', (req, res) => {
+router.post('/add_user_channel', (req, res) => {
     let success;
+    let channel;
+
+    if(req.body.type==="public"){
+        channel = { 
+            public_channels: {name: req.body.name }
+        }
+    } else{
+        channel = { 
+            direct_channels: {name: req.body.name }
+        }
+    }
+
     try{
         User.updateOne(
             { username: req.body.username},
-            { $push: 
-                { 
-                    public_channels: req.body.public, 
-                    direct_channels: req.body.direct
-                }
-            }, (err, user) => {
+            { $push: channel }, (err, user) => {
                 if(err) throw err;
                 if(user.ok){
                     res.json({"success": true});
@@ -101,8 +107,11 @@ router.post('/channels', (req, res) => {
     }
 });
 
+/**TODO
+ * delete user channel
+ */
 //delete user channels
-router.delete('/channels', (req, res) => {
+router.delete('/delete_user_channel', (req, res) => {
 
 });
 

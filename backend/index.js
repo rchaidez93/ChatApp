@@ -6,6 +6,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const usersRouter = require('./routes/Users');
 const workspacesRouter = require('./routes/Workspaces');
+const messagesRouter = require('./routes/Messages');
 
 require('dotenv').config();
 require('dotenv').config({path: '/Users/richardchaidez/Documents/webProjects/react/chat-app/backend/.env.development.local'});
@@ -19,13 +20,20 @@ const io = socketIO(server);
 app.use(express.json());
 app.use('/users', usersRouter);
 app.use('/workspace',workspacesRouter);
+app.use('/messages', messagesRouter);
 
 io.on('connection', (socket) => {
-	console.log('a user connected');
+	socket.join("Public");
+	//should only join room once
+	socket.on("join room", (userRoom) => {
+		socket.join(userRoom.room, (err) => {
+			if(err) console.log(err);
 
-	socket.on("join room", (room) => {
-		socket.join(room, () => {
-			socket.in(room).emit("new message", "Testing new room");
+			const joinRoomMessage ={
+				primary: userRoom.room,
+				secondary: `${userRoom.user} joined ${userRoom.room}`
+			};
+			socket.broadcast.to(userRoom.room).emit("new message", joinRoomMessage);
 		});
 	});
 
@@ -34,10 +42,15 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on("new message", (data) => {
-		socket.to(data.room).emit("new message", data.message)
+		const roomMessage = {
+			primary: data.user,
+			secondary: data.message
+		}
+		socket.to(data.room).emit("new message", roomMessage)
 	});
 
 	socket.on('user typing', () => {
+		console.log("user is typing");
 		io.emit('user typing','user is typing');
 	})
 

@@ -27,12 +27,14 @@ const userSchema = new Schema({
         type: String,
         trim: true,
     },
-    public_channels: {
-        type: Array
-    },
-    direct_channels: {
-        type: Array
-    }
+    public_channels: [{
+        id: mongoose.Types.ObjectId,
+        name: String
+    }],
+    direct_channels: [{
+        id: mongoose.Types.ObjectId,
+        name: String
+    }]
 });
 
 userSchema.methods.comparePassword = function(candidatePassword){
