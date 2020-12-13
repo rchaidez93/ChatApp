@@ -42,11 +42,12 @@ router.post('/authenticate', (req,res) => {
 
 //add user
 router.post('/add_user', (req,res) => {
+    //check if username is unique
+    const username = req.body.username;
     const newUser = [{
         "workspace_id": req.body.workspace_id,
-        // "user_id": 1,
         "admin": true,
-        "username": "Slack",
+        "username": req.body.username,
         "password": "password",
         "fname": "",
         "lname": "",
@@ -79,39 +80,56 @@ router.post('/add_user', (req,res) => {
 
 //add user channels
 router.post('/add_user_channel', (req, res) => {
-    let success;
     let channel;
+
+    //make sure channel isn't already created
+    const channelName = req.body.name;
 
     if(req.body.type==="public"){
         channel = { 
-            public_channels: {name: req.body.name }
+            public_channels: {name: channelName }
         }
     } else{
         channel = { 
-            direct_channels: {name: req.body.name }
+            direct_channels: {name: channelName }
         }
     }
 
-    try{
-        User.updateOne(
-            { username: req.body.username},
-            { $push: channel }, (err, user) => {
-                if(err) throw err;
-                if(user.ok){
-                    res.json({"success": true});
-                    success = true;
-                }
-        });
-    }catch(e) {
-        console.error(e);
-    }
+    User.updateOne(
+        { username: req.body.username},
+        { $push: channel }, (err, user) => {
+            if(err) {
+                res.json({success: false, message: "Channel not added successfully."});
+            } else{
+                res.json({success: true, message: "Channel added successfully."});
+            }            
+    });
+
 });
 
-/**TODO
- * delete user channel
- */
 //delete user channels
 router.delete('/delete_user_channel', (req, res) => {
+    const userId = req.body.userID;
+    const channelType = req.body.channelType;
+    const channelID = req.body.channelID;
+    let pull;
+
+    if(channelType === 'public') {
+        pull = { public_channels: {_id: channelID} };
+    } else {
+        pull = { direct_channels: {_id: channelID} };
+    }
+
+    User.findByIdAndUpdate(
+        userId,
+        { $pull: pull},
+        (err, updatedChannels) => {
+            if(err) {
+                res.json({success: false, message: err});
+            } else {
+                res.json({success: true, message: "Channel removed successfully."})
+            }
+        })
 
 });
 
