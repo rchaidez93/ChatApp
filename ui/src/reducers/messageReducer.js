@@ -5,11 +5,13 @@ const initState = {
 export default function messageReducer(state=initState, action) {
     switch(action.type){
         case 'ADD_MESSAGE':
-            return {...state, data: [...state.data, action.message]};
+            return {...state, data: [...state.data, action.payload]};
         case 'RECEIVE_MESSAGE':
-            return {...state, data: [...state.data, action.message]};
+            return {...state, data: [...state.data, action.payload]};
         case 'LOAD_MESSAGES':
-            return {...state, data: [...state.data.filter(message => message.channelID !== action.channel), ...action.json]};
+            return {
+                data: [action.payload]
+                }; 
         default:
             return state;
     }

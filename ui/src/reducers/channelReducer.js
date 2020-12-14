@@ -1,17 +1,10 @@
-const initState = {
-    data: []
-};
-
-export default function channelReducer(state=initState, action) {
+export default function channelReducer(state, action) {
     switch(action.type){
-        case 'ADD_CHANNEL':
-            return {...state, data: [...state.data, action.channel]};
-        case 'RECIEVE_CHANNEL':
-            return {...state, data: [...state.data, action.channel]};
-        case 'LOAD_CHANNELs':
-            return {...state, data: [...state.data, ...action.json]};
-        case 'DELETE_CHANNEL':
-            return state;
+        case 'CHANGE_CHANNEL':
+            return {
+                name: action.payload.name,
+                id: action.payload.id
+            };
         default:
             return state;
     }

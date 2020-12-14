@@ -1,16 +1,34 @@
-import React, { createContext } from 'react';
+import axios from 'axios';
+import React, { createContext, useEffect, useReducer } from 'react';
+import channelReducer from '../reducers/channelReducer';
+import messageReducer from '../reducers/messageReducer';
 
-const WorkSpaceContext = createContext();
+export const WorkSpaceContext = createContext();
 
+const channelInitState = {
+    name: 'Public',
+    id: "0"
+}
 const WorkSpaceProvider = ({children, user}) => {
-    
-    
-    console.log(user);
+    const [messageState, messageDispatch] = useReducer(messageReducer);
+    const [channelState, channelDispatch] = useReducer(channelReducer, channelInitState)
 
+    useEffect(() => {
+        axios.get("http://127.0.0.1:8080/messages/get_messages",
+        {
+            params: {channelID: channelState.id} // getting Public channel messages by default
+        }).then(res => {
+            messageDispatch({type: 'LOAD_MESSAGES', payload: res.data});
+        });
+    }, [channelState]);
     return (
         <WorkSpaceContext.Provider
         value={{
-            ...user
+            ...user,
+            messageState,
+            messageDispatch,
+            channelState,
+            channelDispatch
         }}
         >
             {children}
@@ -19,4 +37,3 @@ const WorkSpaceProvider = ({children, user}) => {
 }
 
 export { WorkSpaceProvider };
-export default WorkSpaceContext;

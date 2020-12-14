@@ -17,7 +17,7 @@ import Button from '@material-ui/core/Button';
 import io from "socket.io-client";
 import ListView from '../components/ListView';
 import RoomHeader from '../components/RoomHeader';
-import WorkSpaceContext from '../context/WorkSpaceContext';
+import {WorkSpaceContext} from '../context/WorkSpaceContext';
 
 const ENDPOINT = "http://127.0.0.1:8080";
 const drawerWidth = 300;
