@@ -2,10 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    user_id: {
-        type: Number,
-        required: true
-    },
+    _id: mongoose.Types.ObjectId,
     admin: {
         type: Boolean,
         required: true

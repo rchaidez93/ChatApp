@@ -1,4 +1,5 @@
 const router  = require('express').Router();
+const { deleteOne } = require('../models/user.model');
 let User = require('../models/user.model');
 
 router.post('/authenticate', (req,res) => {   
@@ -10,7 +11,6 @@ router.post('/authenticate', (req,res) => {
         public_channels: 1,
         direct_channels: 1,
         workspace_id: 1,
-        user_id: 1,
         admin: 1,
         username: 1,
         password: 1
@@ -28,7 +28,7 @@ router.post('/authenticate', (req,res) => {
                     public_channels: user.public_channels,
                     direct_channels: user.direct_channels,
                     workspace_id: user.workspace_id,
-                    user_id: user.user_id,
+                    user_id: user._id,
                     admin: user.admin,
                     username: user.username,
                 }
@@ -51,32 +51,30 @@ router.post('/add_user', (req,res) => {
         "password": "password",
         "fname": "",
         "lname": "",
-        "public_channels": [],
+        "public_channels": [{
+            name: "Public"
+        }],
         "direct_channels": []
     }];
     User.insertMany(newUser, (err, user) => {
         if(err) throw err;
         console.log(user);
         res.json({
-            "success": true
+            success: true
         });
     })
 })
 
 //delete user
-
-//get user channels
-// router.get('/channels', (req, res) => {
-//     const result = User.findOne({username: req.body.username}, {public_channels: 1,direct_channels: 1}, (err, user) => {
-//         if(err) throw err;
-
-//         res.json({
-//             "public": user.public_channels,
-//             "direct": user.direct_channels
-//         })
-//         console.log(result);
-//     });
-// });
+router.delete('/delete_user', (req,res) => {
+    User.findByIdAndDelete(req.body.userID, (err, user) => {
+        if(err){
+            res.json({success: false, message: "User not deleted successfully."})
+        } else {
+            res.json({success:true, message: "User deleted successfully."})
+        }
+    })
+})
 
 //add user channels
 router.post('/add_user_channel', (req, res) => {
@@ -84,6 +82,7 @@ router.post('/add_user_channel', (req, res) => {
 
     //make sure channel isn't already created
     const channelName = req.body.name;
+    const userID = req.body.userID;
 
     if(req.body.type==="public"){
         channel = { 
@@ -95,9 +94,10 @@ router.post('/add_user_channel', (req, res) => {
         }
     }
 
-    User.updateOne(
-        { username: req.body.username},
-        { $push: channel }, (err, user) => {
+    User.findByIdAndUpdate(
+        userID,
+        { $push: channel },
+        (err, user) => {
             if(err) {
                 res.json({success: false, message: "Channel not added successfully."});
             } else{
