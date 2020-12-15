@@ -30,7 +30,6 @@ const PrivateRoute = ({component: Component, auth, user }) => (
 
 const Routes = () => {
     const context = useContext(AuthContext);
-    console.log(context);
     return (
         <Router>
             <Link to="/login">

@@ -10,7 +10,7 @@ const channelInitState = {
     id: "0"
 }
 const WorkSpaceProvider = ({children, user}) => {
-    const [messageState, messageDispatch] = useReducer(messageReducer);
+    const [messageState, messageDispatch] = useReducer(messageReducer, []);
     const [channelState, channelDispatch] = useReducer(channelReducer, channelInitState)
 
     useEffect(() => {
@@ -25,7 +25,7 @@ const WorkSpaceProvider = ({children, user}) => {
         <WorkSpaceContext.Provider
         value={{
             ...user,
-            messageState,
+            messageState: messageState? messageState : [],
             messageDispatch,
             channelState,
             channelDispatch
