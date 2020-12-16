@@ -26,8 +26,9 @@ router.post("/add_message", (req,res)=> {
 
 //read messages from channel
 router.get("/get_messages", (req,res) => {
-    const channelID = req.body.channel;
-    Message.find({channelID: channelID}, {id:1,channelId:1,text:1,user:1, createdAt:1}, (err, messages) => {
+    const query = req.query;
+    const {channelID} = query;
+    Message.find({channelId: channelID}, {text:1,user:1, createdAt:1}, (err, messages) => {
         if(err){
             res.status(500).json({success: false, message: "Something went wrong."});
         }

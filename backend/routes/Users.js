@@ -108,6 +108,7 @@ router.post('/add_user_channel', (req, res) => {
 });
 
 //delete user channels
+// TODO: remvoe all messages that belong to that channel
 router.delete('/delete_user_channel', (req, res) => {
     const userId = req.body.userID;
     const channelType = req.body.channelType;

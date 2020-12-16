@@ -30,14 +30,14 @@ const ListView = ({listHeaderText, data, selectedChannel, onClick}) => {
             </ListSubheader>
         }
         >
-            {data.map((text, index) => (
+            {data && data.map((channel, index) => (
                 <ListItem
                 button
                 key={index}
-                selected={selectedChannel===text}
-                onClick={() => onClick(text)}
+                selected={selectedChannel===channel.name}
+                onClick={() => onClick(channel)}
                 >
-                    <ListItemText primary={text} />
+                    <ListItemText primary={channel.name} />
                 </ListItem>
             ))}
         </List>

@@ -11,23 +11,22 @@ const channelInitState = {
 }
 const WorkSpaceProvider = ({children, user}) => {
     const [messageState, messageDispatch] = useReducer(messageReducer, []);
-    const [channelState, channelDispatch] = useReducer(channelReducer, channelInitState)
-
+    const [channel, channelDispatch] = useReducer(channelReducer, channelInitState)
     useEffect(() => {
         axios.get("http://127.0.0.1:8080/messages/get_messages",
         {
-            params: {channelID: channelState.id} // getting Public channel messages by default
+            params: {channelID: channel.id} // getting Public channel messages by default
         }).then(res => {
             messageDispatch({type: 'LOAD_MESSAGES', payload: res.data});
         });
-    }, [channelState]);
+    }, [channel]);
     return (
         <WorkSpaceContext.Provider
         value={{
             ...user,
             messageState: messageState? messageState : [],
             messageDispatch,
-            channelState,
+            channel,
             channelDispatch
         }}
         >

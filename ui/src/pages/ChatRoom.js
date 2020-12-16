@@ -60,13 +60,8 @@ const useStyles = makeStyles((theme) => ({
 let socket;
 const ChatRoom = () => {
     const classes = useStyles();
-    const [channels] = useState(['Public']);
-    const [directMessages] = useState(['Jone Doe']);
-    const [selectedChannel, setSelectedChannel] = useState("Public");
     const [message, setMessage] = useState("");
-    // const [allMessages, setAllMessages] = useState([]);
-
-    const { username, messages } = useWorkspace();
+    const { username, messages, channel, channelDispatch, direct_channels, public_channels } = useWorkspace();
     socket = io(ENDPOINT);
     
     useEffect(() => {
@@ -89,12 +84,12 @@ const ChatRoom = () => {
                 socket.connect();
             }//else it'll try to reconnect on its own.
         });
-    }, [selectedChannel, username]);
+    }, [channel, username]);
 
     const sendMessage = () => {
         const testing = {
             user: username,
-            room: selectedChannel,
+            room: channel.name,
             message
         }
         socket.emit("new message", testing);
@@ -106,16 +101,20 @@ const ChatRoom = () => {
     }
 
     const handleChannelChange = (channel) => {
-        socket.emit("leave room", selectedChannel);
-        setSelectedChannel(channel);
-        socket.emit("join room", channel);
-        
+        const channelId = (channel._id) ? channel._id : "0";
+        const joinRoomData = {
+            room: channel.name,
+            user: username
+        };
+        socket.emit("leave room", channel.name);
+        socket.emit("join room", joinRoomData);
+        channelDispatch({type: "CHANGE_CHANNEL", payload: {id:channelId, name: channel.name}});
     }
 
     return (
         <div className={classes.root}>
             <RoomHeader
-             room={selectedChannel}
+             room={channel.name}
             />
             <Drawer
             className={classes.drawer}
@@ -131,19 +130,19 @@ const ChatRoom = () => {
                 <Divider />
                 <ListView
                 listHeaderText="Channels"
-                data={channels}
-                selectedChannel={selectedChannel}
-                onClick={(text) => {
-                    handleChannelChange(text);
+                data={public_channels}
+                selectedChannel={channel.name}
+                onClick={(channel) => {
+                    handleChannelChange(channel);
                 }}
                 />
                 <Divider />
                 <ListView
                 listHeaderText="Direct Messages"
-                data={directMessages}
-                selectedChannel={selectedChannel}
-                onClick={(text) => {
-                    handleChannelChange(text);
+                data={direct_channels}
+                selectedChannel={channel.name}
+                onClick={(channel) => {
+                    handleChannelChange(channel);
                 }}
                 />
             </Drawer>
