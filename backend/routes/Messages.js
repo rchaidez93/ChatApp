@@ -11,14 +11,14 @@ router.post("/add_message", (req,res)=> {
         res.end();
     };
     if(channelID===null || typeof channelID === 'undefined'){
-        res.status(302).json({success: false, message: "Channel id is missing"});
+        res.status(400).json({success: false, message: "Channel id is missing"});
     }
 
     Message.insertMany(req.body, (err, msg)=> {
         if(err){
             res.json({success: false, message: err});
         }else{
-            res.json({messaage: "saved success", success: true});
+            res.json({message: msg, success: true});
         }
     });
 });

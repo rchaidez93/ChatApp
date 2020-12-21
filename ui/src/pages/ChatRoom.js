@@ -18,6 +18,7 @@ import io from "socket.io-client";
 import ListView from '../components/ListView';
 import RoomHeader from '../components/RoomHeader';
 import useWorkspace from '../hooks/useWorkspace';
+import { addMessage } from '../Actions';
 
 const ENDPOINT = "http://127.0.0.1:8080";
 const drawerWidth = 300;
@@ -61,39 +62,66 @@ let socket;
 const ChatRoom = () => {
     const classes = useStyles();
     const [message, setMessage] = useState("");
-    const { username, messages, channel, channelDispatch, direct_channels, public_channels } = useWorkspace();
+    const [initialized, setInitialized] = useState(false);
+    const { username, user_id, messages, messageDispatch, channel, channelDispatch, direct_channels, public_channels } = useWorkspace();
     socket = io(ENDPOINT);
     
     useEffect(() => {
-        const joinRoomData = {
-            room: "Public",
-            user: username
-        };
-        socket.emit('join room', joinRoomData);
+        if(!initialized){
+            connectToRooms();
+            getMessages();
+            disconnect();
+        }
+        
+    }, [direct_channels, public_channels]);
+
+    function connectToRooms() {
+        const rooms = direct_channels.concat(public_channels).map(chan=>chan.name);
+        socket.emit("set rooms", rooms);
+        setInitialized(true);
+    }
+
+    function getMessages(){
         socket.on("new message", (message) => {
-            // const recievedMessage = {
-            //     primary: message.primary,
-            //     secondary: message.secondary
-            // };
-            //TODO :call dispatch
-            // setAllMessages(allMessages => [...allMessages,recievedMessage]);
+            const data = {
+                channelID: message.channelID,
+                text: message.secondary,
+                user: {
+                    userID: user_id,
+                    username:username
+                }
+            } 
+
+            if(message.request === "newMessage"){
+                addMessage(messageDispatch, data);
+            }
         });
 
+        socket.on("joined room", (message) => {
+            channelDispatch({type: "CHANGE_CHANNEL", payload: {id:message.channelID, name: message.name}});
+        })
+
+        setInitialized(true);
+    }
+
+    function disconnect(){
         socket.on('disconnect', (reason) => {
             if(reason === 'io server disconnect'){
                 socket.connect();
             }//else it'll try to reconnect on its own.
         });
-    }, [channel, username]);
+        setInitialized(true);
+    };
 
     const sendMessage = () => {
-        const testing = {
+        const messageData = {
             user: username,
             room: channel.name,
+            channelID: channel.id,
             message
-        }
-        socket.emit("new message", testing);
-        
+        };
+        socket.emit("new message", messageData);
+        setMessage("");
     }
 
     const handleMessageChange = (event) => {
@@ -103,14 +131,14 @@ const ChatRoom = () => {
     const handleChannelChange = (channel) => {
         const channelId = (channel._id) ? channel._id : "0";
         const joinRoomData = {
+            id: channelId,
             room: channel.name,
             user: username
         };
         socket.emit("leave room", channel.name);
         socket.emit("join room", joinRoomData);
-        channelDispatch({type: "CHANGE_CHANNEL", payload: {id:channelId, name: channel.name}});
+        
     }
-
     return (
         <div className={classes.root}>
             <RoomHeader

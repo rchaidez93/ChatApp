@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const usersRouter = require('./routes/Users');
 const workspacesRouter = require('./routes/Workspaces');
 const messagesRouter = require('./routes/Messages');
+const { join } = require('path');
 
 require('dotenv').config();
 require('dotenv').config({path: '/Users/richardchaidez/Documents/webProjects/react/chat-app/backend/.env.development.local'});
@@ -23,30 +24,36 @@ app.use('/workspace',workspacesRouter);
 app.use('/messages', messagesRouter);
 
 io.on('connection', (socket) => {
-	socket.join("Public");
 	//should only join room once
 	socket.on("join room", (userRoom) => {
-		socket.join(userRoom.room, (err) => {
+		socket.join(userRoom.room, (err, room) => {
 			if(err) console.log(err);
-
 			const joinRoomMessage ={
-				primary: userRoom.room,
+				request: "joinRoom",
+				channelID: userRoom.id,
+				name: userRoom.room,
 				secondary: `${userRoom.user} joined ${userRoom.room}`
 			};
-			socket.broadcast.to(userRoom.room).emit("new message", joinRoomMessage);
+			socket.to(userRoom.room).emit("joined room", joinRoomMessage);
 		});
+	});
+
+	socket.on("set rooms", (allUserRooms) => {
+		socket.join(allUserRooms);
 	});
 
 	socket.on("leave room", (room) => {
 		socket.leave(room);
-	})
+	});
 
 	socket.on("new message", (data) => {
 		const roomMessage = {
+			request:"newMessage",
+			channelID: data.channelID,
 			primary: data.user,
 			secondary: data.message
 		}
-		socket.to(data.room).emit("new message", roomMessage)
+		socket.broadcast.to(data.room).emit("new message", roomMessage)
 	});
 
 	socket.on('user typing', () => {
@@ -58,8 +65,9 @@ io.on('connection', (socket) => {
 		io.emit('stop typing', 'no typing');
 	})
 
-	socket.on('disconnect', () => {
+	socket.on('disconnect', (reason) => {
 		console.log('user disconnected');
+		console.log(reason);
 	  });
 });
 

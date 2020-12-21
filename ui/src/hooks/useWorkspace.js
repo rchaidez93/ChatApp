@@ -5,7 +5,7 @@ import { WorkSpaceContext } from "../context/WorkSpaceContext";
 const useWorkspace = () => {
 
     const workspace = useContext(WorkSpaceContext);
-    const {username, direct_channels, public_channels, messageState, messageDispatch, channel, channelDispatch} = workspace;
+    const {username, user_id, direct_channels, public_channels, messageState, messageDispatch, channel, channelDispatch} = workspace;
     const messages = useMemo(() => {
         return messageState.map(msg => {
             return {
@@ -17,6 +17,7 @@ const useWorkspace = () => {
 
     return {
         username,
+        user_id,
         messages,
         direct_channels, 
         public_channels,

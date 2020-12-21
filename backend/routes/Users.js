@@ -1,5 +1,4 @@
 const router  = require('express').Router();
-const { deleteOne } = require('../models/user.model');
 let User = require('../models/user.model');
 
 router.post('/authenticate', (req,res) => {   
